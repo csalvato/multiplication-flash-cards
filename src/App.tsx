@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Confetti from 'react-confetti'
 
 function App() {
   const [maxNumber, setMaxNumber] = useState<number>(9)
@@ -6,7 +7,24 @@ function App() {
   const [currentCard, setCurrentCard] = useState<{ a: number; b: number }>({ a: 0, b: 0 })
   const [userAnswer, setUserAnswer] = useState<string>('')
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const [showAnswer, setShowAnswer] = useState<boolean>(false)
   const [score, setScore] = useState<{ correct: number; total: number }>({ correct: 0, total: 0 })
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const generateNewCard = () => {
     let a, b
@@ -20,6 +38,7 @@ function App() {
     setCurrentCard({ a, b })
     setUserAnswer('')
     setIsCorrect(null)
+    setShowAnswer(false)
   }
 
   useEffect(() => {
@@ -30,14 +49,36 @@ function App() {
     const correctAnswer = currentCard.a * currentCard.b
     const isAnswerCorrect = parseInt(userAnswer) === correctAnswer
     setIsCorrect(isAnswerCorrect)
+    if (isAnswerCorrect) {
+      setScore(prev => ({
+        correct: prev.correct + 1,
+        total: prev.total + 1
+      }))
+    }
+  }
+
+  const handleShowAnswer = () => {
+    setShowAnswer(true)
     setScore(prev => ({
-      correct: prev.correct + (isAnswerCorrect ? 1 : 0),
+      correct: prev.correct,
       total: prev.total + 1
     }))
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      {isCorrect && (
+        <Confetti
+          width={windowSize.width}
+          height={windowSize.height}
+          recycle={false}
+          numberOfPieces={300}
+          gravity={0.8}
+          wind={0.1}
+          initialVelocityY={15}
+          confettiSource={{ x: windowSize.width / 2, y: 0, w: 0, h: 0 }}
+        />
+      )}
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Multiplication Flash Cards</h1>
 
@@ -85,18 +126,24 @@ function App() {
               onChange={(e) => setUserAnswer(e.target.value)}
               placeholder="Enter your answer"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isCorrect !== null}
+              disabled={isCorrect !== null || showAnswer}
             />
           </div>
 
           {isCorrect !== null && (
             <div className={`text-center mb-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-              {isCorrect ? 'Correct!' : `Incorrect. The answer is ${currentCard.a * currentCard.b}`}
+              {isCorrect ? 'Correct!' : 'Incorrect. Try again or show the answer.'}
             </div>
           )}
 
-          <div className="flex justify-center">
-            {isCorrect === null ? (
+          {showAnswer && (
+            <div className="text-center mb-4 text-blue-600">
+              The answer is {currentCard.a * currentCard.b}
+            </div>
+          )}
+
+          <div className="flex justify-center gap-4">
+            {isCorrect === null && !showAnswer ? (
               <button
                 onClick={handleSubmit}
                 className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
@@ -104,6 +151,24 @@ function App() {
               >
                 Check Answer
               </button>
+            ) : isCorrect === false && !showAnswer ? (
+              <>
+                <button
+                  onClick={() => {
+                    setUserAnswer('')
+                    setIsCorrect(null)
+                  }}
+                  className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Try Again
+                </button>
+                <button
+                  onClick={handleShowAnswer}
+                  className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Show Answer
+                </button>
+              </>
             ) : (
               <button
                 onClick={generateNewCard}
