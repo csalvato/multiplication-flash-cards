@@ -16,6 +16,7 @@ function App() {
     width: window.innerWidth,
     height: window.innerHeight,
   })
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   useEffect(() => {
     const handleResize = () => {
@@ -23,6 +24,7 @@ function App() {
         width: window.innerWidth,
         height: window.innerHeight,
       })
+      setIsMobile(window.innerWidth < 768)
     }
 
     window.addEventListener('resize', handleResize)
@@ -80,6 +82,23 @@ function App() {
       total: prev.total + 1
     }))
   }
+
+  const handleKeyPress = (digit: string) => {
+    if (isCorrect !== null || showAnswer) return
+    setUserAnswer(prev => prev + digit)
+  }
+
+  const handleBackspace = () => {
+    if (isCorrect !== null || showAnswer) return
+    setUserAnswer(prev => prev.slice(0, -1))
+  }
+
+  const handleClear = () => {
+    if (isCorrect !== null || showAnswer) return
+    setUserAnswer('')
+  }
+
+  const isKeypadDisabled = isCorrect !== null || showAnswer
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
@@ -168,9 +187,16 @@ function App() {
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
               placeholder="Enter your answer"
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isCorrect !== null || showAnswer}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isMobile ? 'hidden' : ''
+              }`}
+              disabled={isKeypadDisabled}
             />
+            {isMobile && (
+              <div className="bg-white p-4 rounded-lg shadow-inner mb-4 text-center text-2xl font-bold">
+                {userAnswer || '0'}
+              </div>
+            )}
           </div>
 
           {isCorrect !== null && (
@@ -184,6 +210,29 @@ function App() {
               The answer is {operation === 'multiplication'
                 ? currentCard.a * currentCard.b
                 : currentCard.a / currentCard.b}
+            </div>
+          )}
+
+          {isMobile && (
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, '⌫'].map((key) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    if (key === 'C') handleClear()
+                    else if (key === '⌫') handleBackspace()
+                    else handleKeyPress(key.toString())
+                  }}
+                  className={`p-4 text-xl font-bold rounded-lg transition-colors ${
+                    typeof key === 'number'
+                      ? 'bg-gray-200 hover:bg-gray-300'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  } ${isKeypadDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={isKeypadDisabled}
+                >
+                  {key}
+                </button>
+              ))}
             </div>
           )}
 
