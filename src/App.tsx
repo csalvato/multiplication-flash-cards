@@ -22,6 +22,24 @@ function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        if (isCorrect === null && !showAnswer && userAnswer) {
+          handleSubmit()
+        } else if (isCorrect === false && !showAnswer) {
+          setUserAnswer('')
+          setIsCorrect(null)
+        } else if (isCorrect === true || showAnswer) {
+          generateNewCard()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isCorrect, showAnswer, userAnswer])
+
   const generateNewCard = () => {
     let a, b
     if (operation === 'multiplication') {
