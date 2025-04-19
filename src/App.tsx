@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 type Operation = 'multiplication' | 'division'
 
 function App() {
-  const [maxNumber, setMaxNumber] = useState<number>(9)
+  const [maxNumber, setMaxNumber] = useState<number>(12)
   const [focusNumber, setFocusNumber] = useState<number | null>(null)
   const [operation, setOperation] = useState<Operation>('multiplication')
   const [currentCard, setCurrentCard] = useState<{ a: number; b: number }>({ a: 0, b: 0 })
@@ -122,35 +122,38 @@ function App() {
             </button>
           </div>
 
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Practice up to:
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="15"
-            value={maxNumber}
-            onChange={(e) => setMaxNumber(Math.min(15, Math.max(1, parseInt(e.target.value) || 1)))}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Focus on number (optional):
-          </label>
-          <input
-            type="number"
-            min="1"
-            max={maxNumber}
-            value={focusNumber || ''}
-            onChange={(e) => {
-              const value = e.target.value ? parseInt(e.target.value) : null
-              setFocusNumber(value ? Math.min(maxNumber, Math.max(1, value)) : null)
-            }}
-            placeholder="Leave empty for random"
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Practice up to:
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="15"
+                value={maxNumber}
+                onChange={(e) => setMaxNumber(Math.min(15, Math.max(1, parseInt(e.target.value) || 1)))}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Focus on:
+              </label>
+              <input
+                type="number"
+                min="1"
+                max={maxNumber}
+                value={focusNumber || ''}
+                onChange={(e) => {
+                  const value = e.target.value ? parseInt(e.target.value) : null
+                  setFocusNumber(value ? Math.min(maxNumber, Math.max(1, value)) : null)
+                }}
+                placeholder="Random"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
         </div>
 
         <div className={`p-6 rounded-lg mb-6 ${
