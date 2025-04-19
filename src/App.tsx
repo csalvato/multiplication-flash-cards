@@ -4,7 +4,8 @@ function App() {
   const [maxNumber, setMaxNumber] = useState<number>(9)
   const [focusNumber, setFocusNumber] = useState<number | null>(null)
   const [currentCard, setCurrentCard] = useState<{ a: number; b: number }>({ a: 0, b: 0 })
-  const [showAnswer, setShowAnswer] = useState<boolean>(false)
+  const [userAnswer, setUserAnswer] = useState<string>('')
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
   const [score, setScore] = useState<{ correct: number; total: number }>({ correct: 0, total: 0 })
 
   const generateNewCard = () => {
@@ -17,20 +18,22 @@ function App() {
       b = Math.floor(Math.random() * maxNumber) + 1
     }
     setCurrentCard({ a, b })
-    setShowAnswer(false)
+    setUserAnswer('')
+    setIsCorrect(null)
   }
 
   useEffect(() => {
     generateNewCard()
   }, [maxNumber, focusNumber])
 
-  const handleCheckAnswer = (userAnswer: number) => {
+  const handleSubmit = () => {
     const correctAnswer = currentCard.a * currentCard.b
+    const isAnswerCorrect = parseInt(userAnswer) === correctAnswer
+    setIsCorrect(isAnswerCorrect)
     setScore(prev => ({
-      correct: prev.correct + (userAnswer === correctAnswer ? 1 : 0),
+      correct: prev.correct + (isAnswerCorrect ? 1 : 0),
       total: prev.total + 1
     }))
-    generateNewCard()
   }
 
   return (
@@ -74,32 +77,42 @@ function App() {
           <div className="text-4xl font-bold text-center mb-4 text-gray-800">
             {currentCard.a} × {currentCard.b} = ?
           </div>
-          {showAnswer && (
-            <div className="text-3xl font-bold text-center text-green-600 mb-4">
-              {currentCard.a * currentCard.b}
+
+          <div className="mb-4">
+            <input
+              type="number"
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              placeholder="Enter your answer"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isCorrect !== null}
+            />
+          </div>
+
+          {isCorrect !== null && (
+            <div className={`text-center mb-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+              {isCorrect ? 'Correct!' : `Incorrect. The answer is ${currentCard.a * currentCard.b}`}
             </div>
           )}
-          <button
-            onClick={() => setShowAnswer(!showAnswer)}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            {showAnswer ? 'Hide Answer' : 'Show Answer'}
-          </button>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <button
-            onClick={() => handleCheckAnswer(currentCard.a * currentCard.b)}
-            className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
-          >
-            Correct
-          </button>
-          <button
-            onClick={() => handleCheckAnswer(-1)}
-            className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
-          >
-            Incorrect
-          </button>
+          <div className="flex justify-center">
+            {isCorrect === null ? (
+              <button
+                onClick={handleSubmit}
+                className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
+                disabled={!userAnswer}
+              >
+                Check Answer
+              </button>
+            ) : (
+              <button
+                onClick={generateNewCard}
+                className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Next Question
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="text-center text-gray-700">
