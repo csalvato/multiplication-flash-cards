@@ -153,7 +153,11 @@ function App() {
           />
         </div>
 
-        <div className="bg-blue-50 p-6 rounded-lg mb-6">
+        <div className={`p-6 rounded-lg mb-6 ${
+          isCorrect === true ? 'bg-green-100' :
+          isCorrect === false ? 'bg-red-100' :
+          'bg-blue-50'
+        }`}>
           <div className="text-4xl font-bold text-center mb-4 text-gray-800">
             {operation === 'multiplication'
               ? `${currentCard.a} × ${currentCard.b} = ?`
@@ -177,12 +181,6 @@ function App() {
               </div>
             )}
           </div>
-
-          {isCorrect !== null && (
-            <div className={`text-center mb-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-              {isCorrect ? 'Correct!' : 'Incorrect. Try again or show the answer.'}
-            </div>
-          )}
 
           {showAnswer && (
             <div className="text-center mb-4 text-blue-600">
