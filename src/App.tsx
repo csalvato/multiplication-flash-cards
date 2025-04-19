@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import Confetti from 'react-confetti'
 
+type Operation = 'multiplication' | 'division'
+
 function App() {
   const [maxNumber, setMaxNumber] = useState<number>(9)
   const [focusNumber, setFocusNumber] = useState<number | null>(null)
+  const [operation, setOperation] = useState<Operation>('multiplication')
   const [currentCard, setCurrentCard] = useState<{ a: number; b: number }>({ a: 0, b: 0 })
   const [userAnswer, setUserAnswer] = useState<string>('')
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
@@ -28,12 +31,23 @@ function App() {
 
   const generateNewCard = () => {
     let a, b
-    if (focusNumber !== null) {
-      a = focusNumber
-      b = Math.floor(Math.random() * maxNumber) + 1
+    if (operation === 'multiplication') {
+      if (focusNumber !== null) {
+        a = focusNumber
+        b = Math.floor(Math.random() * maxNumber) + 1
+      } else {
+        a = Math.floor(Math.random() * maxNumber) + 1
+        b = Math.floor(Math.random() * maxNumber) + 1
+      }
     } else {
-      a = Math.floor(Math.random() * maxNumber) + 1
-      b = Math.floor(Math.random() * maxNumber) + 1
+      // For division, we want whole number results
+      if (focusNumber !== null) {
+        a = focusNumber * (Math.floor(Math.random() * maxNumber) + 1)
+        b = focusNumber
+      } else {
+        b = Math.floor(Math.random() * maxNumber) + 1
+        a = b * (Math.floor(Math.random() * maxNumber) + 1)
+      }
     }
     setCurrentCard({ a, b })
     setUserAnswer('')
@@ -43,10 +57,12 @@ function App() {
 
   useEffect(() => {
     generateNewCard()
-  }, [maxNumber, focusNumber])
+  }, [maxNumber, focusNumber, operation])
 
   const handleSubmit = () => {
-    const correctAnswer = currentCard.a * currentCard.b
+    const correctAnswer = operation === 'multiplication'
+      ? currentCard.a * currentCard.b
+      : currentCard.a / currentCard.b
     const isAnswerCorrect = parseInt(userAnswer) === correctAnswer
     setIsCorrect(isAnswerCorrect)
     if (isAnswerCorrect) {
@@ -80,9 +96,34 @@ function App() {
         />
       )}
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Multiplication Flash Cards</h1>
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+          {operation === 'multiplication' ? 'Multiplication' : 'Division'} Flash Cards
+        </h1>
 
         <div className="mb-6">
+          <div className="flex justify-center gap-4 mb-6">
+            <button
+              onClick={() => setOperation('multiplication')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                operation === 'multiplication'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Multiplication
+            </button>
+            <button
+              onClick={() => setOperation('division')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                operation === 'division'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Division
+            </button>
+          </div>
+
           <label className="block text-gray-700 text-sm font-bold mb-2">
             Practice up to:
           </label>
@@ -116,7 +157,9 @@ function App() {
 
         <div className="bg-blue-50 p-6 rounded-lg mb-6">
           <div className="text-4xl font-bold text-center mb-4 text-gray-800">
-            {currentCard.a} × {currentCard.b} = ?
+            {operation === 'multiplication'
+              ? `${currentCard.a} × ${currentCard.b} = ?`
+              : `${currentCard.a} ÷ ${currentCard.b} = ?`}
           </div>
 
           <div className="mb-4">
@@ -138,7 +181,9 @@ function App() {
 
           {showAnswer && (
             <div className="text-center mb-4 text-blue-600">
-              The answer is {currentCard.a * currentCard.b}
+              The answer is {operation === 'multiplication'
+                ? currentCard.a * currentCard.b
+                : currentCard.a / currentCard.b}
             </div>
           )}
 
