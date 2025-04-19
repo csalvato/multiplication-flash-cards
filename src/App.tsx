@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import Confetti from 'react-confetti'
 
 type Operation = 'multiplication' | 'division'
 
@@ -12,18 +11,10 @@ function App() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
   const [showAnswer, setShowAnswer] = useState<boolean>(false)
   const [score, setScore] = useState<{ correct: number; total: number }>({ correct: 0, total: 0 })
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  })
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   useEffect(() => {
     const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      })
       setIsMobile(window.innerWidth < 768)
     }
 
@@ -102,18 +93,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      {isCorrect && (
-        <Confetti
-          width={windowSize.width}
-          height={windowSize.height}
-          recycle={false}
-          numberOfPieces={300}
-          gravity={0.8}
-          wind={0.1}
-          initialVelocityY={15}
-          confettiSource={{ x: windowSize.width / 2, y: 0, w: 0, h: 0 }}
-        />
-      )}
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
           {operation === 'multiplication' ? 'Multiplication' : 'Division'} Flash Cards
